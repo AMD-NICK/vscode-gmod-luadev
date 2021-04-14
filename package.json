@@ -41,6 +41,11 @@
         "configuration": {
             "title": "GMod LuaDev Settings",
             "properties": {
+                "gmod-luadev.host": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Game server address. Leave blank to use localhost"
+                },
                 "gmod-luadev.port": {
                     "type": "integer",
                     "default": 27099,

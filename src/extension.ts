@@ -37,7 +37,7 @@ function send( realm: string, client?: string ): void {
 		document.getText()
 	);
 	socket.on( "error", ( ex ) => {
-		if ( ex.code == "ECONNREFUSED" )
+		if ( ex.name == "ECONNREFUSED" )
 			vscode.window.showErrorMessage(
 				"Could not connect to LuaDev!" );
 		else

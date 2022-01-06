@@ -3,8 +3,10 @@
 // Imports /////////////////////////////////////////////////////////////////////
 
 import * as path from "path";
-import * as net from "net";
 import * as vscode from "vscode";
+
+import fetch from 'node-fetch';
+var crypto = require('crypto');
 
 // Functions ///////////////////////////////////////////////////////////////////
 
@@ -26,63 +28,53 @@ function send( realm: string, client?: string ): void {
 			? "_"
 			: path.basename( document.uri.fsPath );
 
-	// Open Socket //
+	const postUrl = config.get("posturl", "https://httpbin.org/post");
+	const hashSalt = config.get("hashsalt", "changeme");
 
-	let host = config.get( "host", "127.0.0.1" )
-	if (host.trim() === "") host = "127.0.0.1"
+	const code = document.getText();
+	const hash = crypto.createHash('sha256').update(hashSalt + code).digest('hex');
+	const data = {source: document_title, code: code, hash: hash, realm: realm}
 
-	const socket = new net.Socket();
-	socket.connect( config.get( "port", 27099 ), host );
-	socket.write(
-		realm + "\n" +
-		document_title + "\n" +
-		client + "\n" +
-		document.getText()
-	);
-	socket.on( "error", ( ex ) => {
-		if ( ex.name == "ECONNREFUSED" )
-			vscode.window.showErrorMessage(
-				"Could not connect to LuaDev!" );
-		else
-			vscode.window.showErrorMessage( ex.message );
+	fetch(postUrl, {
+		method: 'POST',
+		body:    JSON.stringify(data),
+		headers: { 'Content-Type': 'application/json' },
 	});
-	socket.end();
-
 }
 
 function getPlayerList(): void {
 
-	const config = vscode.workspace.getConfiguration( "gmod-luadev" )
+	// #todo
 
-	const socket = new net.Socket();
-	socket.connect( config.get( "port", 27099 ) );
-	socket.write( "requestPlayers\n" );
-	socket.setEncoding( "utf8" );
-	socket.on( "data", function ( data: string ): void {
+	// const config = vscode.workspace.getConfiguration( "gmod-luadev" )
 
-		const clients = data.split( "\n" );
-		clients.sort();
+	// const socket = new net.Socket();
+	// socket.connect( config.get( "port", 27099 ) );
+	// socket.write( "requestPlayers\n" );
+	// socket.setEncoding( "utf8" );
+	// socket.on( "data", function ( data: string ): void {
 
-		vscode.window.showQuickPick(
-			clients,
-			{
-				placeHolder: "Select Client to send to"
-			}
-		).then( function ( client: string ): void {
-			// Dialogue cancelled
-			if ( client == null ) return;
-			// Send to client
-			send( "client", client );
-		});
+	// 	const clients = data.split( "\n" );
+	// 	clients.sort();
 
-	});
+	// 	vscode.window.showQuickPick(
+	// 		clients,
+	// 		{
+	// 			placeHolder: "Select Client to send to"
+	// 		}
+	// 	).then( function ( client: string ): void {
+	// 		// Dialogue cancelled
+	// 		if ( client == null ) return;
+	// 		// Send to client
+	// 		send( "client", client );
+	// 	});
+
+	// });
 
 }
 
 // Exports /////////////////////////////////////////////////////////////////////
-
 export function activate( context: vscode.ExtensionContext ): void {
-
 	const command = vscode.commands.registerCommand;
 
 	context.subscriptions.push(

@@ -3,7 +3,7 @@
     "displayName": "GMod LuaDev",
     "description": "LuaDev integration for VS Code.",
     "icon": "images/logo.png",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "publisher": "chelog",
     "engines": {
         "vscode": "^1.0.0"

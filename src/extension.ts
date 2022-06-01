@@ -53,9 +53,10 @@ function send( realm: string, client?: string ): void {
 function getPlayerList(): void {
 
 	const config = vscode.workspace.getConfiguration( "gmod-luadev" )
-
+	let host = config.get( "host", "127.0.0.1" )
+	if (host.trim() === "") host = "127.0.0.1"
 	const socket = new net.Socket();
-	socket.connect( config.get( "port", 27099 ) );
+	socket.connect( config.get( "port", 27099 ), host );
 	socket.write( "requestPlayers\n" );
 	socket.setEncoding( "utf8" );
 	socket.on( "data", function ( data: string ): void {
